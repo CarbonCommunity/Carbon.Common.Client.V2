@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build">
 	<PropertyGroup>
-		<Product>Carbon.Client.Common</Product>
+		<Product>Carbon.Common.Client</Product>
 		<OutputType>Library</OutputType>
 		<ProjectGuid>{30B4B72A-9E9A-422D-9FDE-98DDD677B1AE}</ProjectGuid>
 	</PropertyGroup>
@@ -11,10 +11,6 @@
 	<ItemGroup>
 		<PackageReference Include="AsmResolver.DotNet" Version="5.4.0" />
 		<ProjectReference Include="$(SolutionDir)\Carbon.Components\Carbon.Common\Carbon.Common.csproj" Private="false" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="src\Network\Client\" />
 	</ItemGroup>
 
 	<Target Name="CustomRelease" AfterTargets="Build" DependsOnTargets="PrepareRelease">
