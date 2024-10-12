@@ -8,7 +8,7 @@ internal class Server : ServerNetwork
 
 	#region Hooks
 
-	public override async void OnConnect()
+	public override void OnConnect()
 	{
 		base.OnConnect();
 

@@ -24,7 +24,7 @@ public class Client : ClientNetwork
 				return;
 			}
 		}
-		catch(ObjectDisposedException ex)
+		catch(ObjectDisposedException)
 		{
 			Shutdown($"Timed out");
 			return;
