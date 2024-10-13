@@ -15,7 +15,7 @@ public class ClientNetwork : BaseNetwork
 	public string ip { get; private set; }
 	public int port { get; private set; }
 
-	public Connection connection;
+	public CarbonConnection connection;
 
 	public bool IsConnected => net != null && net.Connected;
 	public bool HasData => connection != null && connection.stream != null && connection.stream.DataAvailable;
@@ -43,7 +43,7 @@ public class ClientNetwork : BaseNetwork
 
 		if (net != null && net.Connected)
 		{
-			connection = Connection.Create(net, true);
+			connection = CarbonConnection.Create(net, true);
 			OnConnect();
 		}
 		else
@@ -64,7 +64,7 @@ public class ClientNetwork : BaseNetwork
 
 		connection?.Disconnect();
 
-		Debug.Log($"Client shutdown: {reason}");
+		Console.WriteLine($"Client shutdown: {reason}");
 		OnShutdown();
 
 		connection = null;
@@ -79,7 +79,7 @@ public class ClientNetwork : BaseNetwork
 
 	public virtual void OnConnectFail(SocketError socket)
 	{
-		Debug.LogError($"Couldn't connect ({socket})");
+		Console.WriteLine($"[ERRO] Couldn't connect ({socket})");
 	}
 
 	public virtual void OnShutdown()
@@ -130,7 +130,7 @@ public class ClientNetwork : BaseNetwork
 		{
 
 			default:
-				Debug.LogError($"Unhandled MessageType received: {message}");
+				Console.WriteLine($"Unhandled MessageType received: {message}");
 				break;
 		}
 

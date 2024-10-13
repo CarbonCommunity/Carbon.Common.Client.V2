@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Carbon.Client;
 
-public class Connection
+public class CarbonConnection
 {
 	public TcpClient net;
 	public BasePlayer player;
@@ -39,9 +39,9 @@ public class Connection
 		net = null;
 	}
 
-	public static Connection Create(TcpClient client, bool isLocal = false)
+	public static CarbonConnection Create(TcpClient client, bool isLocal = false)
 	{
-		var nc = new Connection();
+		var nc = new CarbonConnection();
 		nc.net = client;
 		nc.username = "Monaco";
 		nc.ip = client.Client.RemoteEndPoint.ToString();

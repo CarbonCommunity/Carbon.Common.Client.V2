@@ -20,7 +20,6 @@ public enum MessageType
 	EntityUpdate_Position
 }
 
-
 public class GenericsEx
 {
 	public static Target Cast<Source, Target>(Source obj)
@@ -50,14 +49,14 @@ public class NetWrite : BinaryWriter
 {
 	public NetWrite() { }
 	public NetWrite(Stream stream) : base(stream) { }
-	public NetWrite(Connection conn) : base(conn.stream)
+	public NetWrite(CarbonConnection conn) : base(conn.stream)
 	{
 		this.conn = conn;
 	}
 
 	public static MemoryStream stringBuffer = new();
 
-	public Connection conn;
+	public CarbonConnection conn;
 	public byte[] data;
 
 	public int length
@@ -182,7 +181,7 @@ public class NetWrite : BinaryWriter
 		else if ((uint)length > 10485760U)
 		{
 			WriteUnmanaged(0U);
-			Debug.LogError("BytesWithSize: Too big " + length);
+			Console.WriteLine("[ERRO] BytesWithSize: Too big " + length);
 		}
 		else
 		{
@@ -263,7 +262,7 @@ public class NetWrite : BinaryWriter
 		else if (typeof(T) == typeof(NetworkId))
 			NetworkId(GenericsEx.Cast<T, NetworkId>(val));
 		else
-			Debug.LogError($"NetworkData.Write - no handler to write {val} -> {val.GetType()}");
+			Console.WriteLine($"[ERRO] NetworkData.Write - no handler to write {val} -> {val.GetType()}");
 	}
 	public void End() => Int32((int)MessageType.LAST);
 	public void Send(bool clear = true)
@@ -345,12 +344,12 @@ public class NetRead : BinaryReader
 	public static byte[] byteBuffer = new byte[8388608];
 
 	public NetRead(Stream stream) : base(stream) { }
-	public NetRead(Connection conn) : base(conn.stream)
+	public NetRead(CarbonConnection conn) : base(conn.stream)
 	{
 		this.conn = conn;
 	}
 
-	public Connection conn;
+	public CarbonConnection conn;
 	public MessageType Type;
 	public byte[] data = new byte[8388608];
 	public int length

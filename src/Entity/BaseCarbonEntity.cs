@@ -1,5 +1,6 @@
-﻿using System.Management.Instrumentation;
+﻿using System;
 using UnityEngine;
+using static Carbon.Client.GameManager;
 
 namespace Carbon.Client;
 
@@ -8,6 +9,7 @@ public class BaseCarbonEntity : MonoBehaviour
 	public NetworkId netId;
 	public bool isSpawned;
 	public bool isServer;
+	public PrefabInfo prefab;
 
 	public virtual void ServerInit()
 	{
@@ -28,7 +30,7 @@ public class BaseCarbonEntity : MonoBehaviour
 	{
 		if (isSpawned)
 		{
-			Debug.LogWarning("Trying to spawn the entity twice!");
+			Console.WriteLine("[WARN] Trying to spawn the entity twice!");
 			return;
 		}
 

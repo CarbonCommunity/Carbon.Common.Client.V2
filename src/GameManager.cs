@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace Carbon.Client;
 
-public class CarbonGameManager : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
 	public static bool isServer;
-	public static Dictionary<uint, SpawnablePrefab> spawnablePrefabs = [];
+	public static Dictionary<uint, PrefabInfo> spawnablePrefabs = [];
 
 	public static void Initialize(bool isServer)
 	{
-		CarbonGameManager.isServer = isServer;
+		GameManager.isServer = isServer;
 	}
 
 	public static T CreateSpawnable<T>(uint assetId, Vector3 pos = default, Quaternion rot = default) where T : BaseCarbonEntity
@@ -38,7 +38,7 @@ public class CarbonGameManager : MonoBehaviour
 		}
 	}
 
-	public struct SpawnablePrefab
+	public struct PrefabInfo
 	{
 		public string assetPath;
 		public GameObject gameObject;

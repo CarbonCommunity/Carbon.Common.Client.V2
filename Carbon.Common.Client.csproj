@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build">
+﻿<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build">
 	<PropertyGroup>
 		<Product>Carbon.Common.Client</Product>
 		<OutputType>Library</OutputType>
@@ -7,13 +7,15 @@
 
 	<Import Project="$(SolutionDir)\.msbuild\Common.props" />
 	<Import Project="$(SolutionDir)\.msbuild\ReferencesRust.props" />
-
 	<ItemGroup>
-		<ProjectReference Include="$(SolutionDir)\Carbon.Components\Carbon.Common\Carbon.Common.csproj" Private="false" />
+	  <Compile Remove="src\Assets\Addon.Impl.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="src\Assets\Addon.Impl.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="src\Addons\" />
+		<ProjectReference Include="$(SolutionDir)\Carbon.Components\Carbon.Common\Carbon.Common.csproj" Private="false" />
 	</ItemGroup>
 
 	<Target Name="CustomRelease" AfterTargets="Build" DependsOnTargets="PrepareRelease">
