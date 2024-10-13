@@ -61,23 +61,6 @@ namespace Carbon.Client.Assets
 			};
 		}
 
-		public static byte[] Compress(byte[] buffer)
-		{
-			using MemoryStream memoryStream = new MemoryStream();
-			using GZipStream gzipStream = new GZipStream(memoryStream, CompressionMode.Compress);
-			gzipStream.Write(buffer, 0, buffer.Length);
-			gzipStream.Close();
-			return memoryStream.ToArray();
-		}
-		public static byte[] Decompress(byte[] buffer)
-		{
-			using MemoryStream memoryStream = new MemoryStream(buffer);
-			using GZipStream gzipStream = new GZipStream(memoryStream, CompressionMode.Decompress);
-			using MemoryStream decompressedStream = new MemoryStream();
-			gzipStream.CopyTo(decompressedStream);
-			return decompressedStream.ToArray();
-		}
-
 		public static Addon Create(AddonInfo info, params Asset[] assets)
 		{
 			var addon = new Addon
@@ -95,8 +78,6 @@ namespace Carbon.Client.Assets
 			}
 
 			addon.MarkDirty();
-			addon.checksum = addon.GetChecksum();
-
 			return addon;
 		}
 		public static Addon ImportFromFile(string path)
@@ -110,8 +91,6 @@ namespace Carbon.Client.Assets
 		}
 		public static Addon Deserialize(byte[] buffer)
 		{
-			buffer = Decompress(buffer);
-
 			var addon = new Addon();
 
 			using var memoryStream = new MemoryStream(buffer);
@@ -143,7 +122,6 @@ namespace Carbon.Client.Assets
 			}
 
 			addon.MarkDirty();
-			addon.checksum = addon.GetChecksum();
 			return addon;
 		}
 
@@ -177,7 +155,7 @@ namespace Carbon.Client.Assets
 				}
 			}
 
-			return Compress(memoryStream.ToArray());
+			return memoryStream.ToArray();
 		}
 		public void StoreToFile(string path)
 		{
@@ -209,6 +187,7 @@ namespace Carbon.Client.Assets
 			}
 
 			buffer = Serialize();
+			UpdateChecksum();
 
 			isDirty = true;
 		}
@@ -225,13 +204,14 @@ namespace Carbon.Client.Assets
 				buffer = null;
 			}
 		}
-		public string GetChecksum()
+
+		internal void UpdateChecksum()
 		{
 			using var md5 = MD5.Create();
 			var bytes = md5.ComputeHash(buffer);
 			var result = Convert.ToBase64String(bytes);
 			Array.Clear(bytes, 0, bytes.Length);
-			return result;
+			checksum = result;
 		}
 
 		public class Manifest
