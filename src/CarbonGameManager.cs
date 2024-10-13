@@ -17,7 +17,7 @@ public class CarbonGameManager : MonoBehaviour
 	{
 		if (spawnablePrefabs.TryGetValue(assetId, out var prefab))
 		{
-			var instance = Object.Instantiate(prefab.gameObject, pos, rot).GetComponent<T>();
+			var instance = Instantiate(prefab.gameObject, pos, rot).GetComponent<T>();
 			instance.Init(isServer);
 			return instance;
 		}

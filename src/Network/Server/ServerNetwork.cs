@@ -85,7 +85,7 @@ public class ServerNetwork : BaseNetwork
 
     public virtual void NetworkUpdate()
     {
-        if (net.Pending())
+        if (net != null && net.Pending())
         {
             OnClientConnected(Connection.Create(net.AcceptTcpClient()));
         }
