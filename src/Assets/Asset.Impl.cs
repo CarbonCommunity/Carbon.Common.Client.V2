@@ -69,7 +69,7 @@ public partial class Asset : IDisposable
 
 				ProcessClientObjects(cache.Object.transform);
 
-				if (cachedRustBundle.RustPrefabs.TryGetValue(processedAssetPath, out var rustPrefabs))
+				if (cachedRustBundle.rustPrefabs.TryGetValue(processedAssetPath, out var rustPrefabs))
 				{
 					cache.RustPrefabs = rustPrefabs;
 				}

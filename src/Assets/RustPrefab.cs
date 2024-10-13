@@ -1,5 +1,4 @@
 ﻿using System;
-using ProtoBuf;
 using UnityEngine;
 
 namespace Carbon.Client
@@ -13,19 +12,14 @@ namespace Carbon.Client
 		public Vector3 rotation;
 		public Vector3 scale;
 		public EntityData entity;
-		public ModelData model;
 
 		public class EntityData
 		{
 			public bool enforcePrefab;
 			public EntityFlags flags;
 			public ulong skin;
-
-#if UNITY_EDITOR
-			[Header("Entity Types")]
-#endif
-
-			public CombatEntity combat;
+			public float health = -1;
+			public float maxHealth = -1;
 
 			[Flags]
 			public enum EntityFlags
@@ -57,27 +51,6 @@ namespace Carbon.Client
 				Protected = 16777216,
 				Transferring = 33554432
 			}
-
-			public class CombatEntity
-			{
-				public float health = -1;
-				public float maxHealth = -1;
-			}
-		}
-
-		[Serializable, ProtoContract]
-		public class ModelData
-		{
-			#region Editor
-
-			public GameObject prefabReference;
-
-			#endregion
-
-#if UNITY_EDITOR
-			[HideInInspector]
-#endif
-			public string prefabPath;
 		}
 	}
 }

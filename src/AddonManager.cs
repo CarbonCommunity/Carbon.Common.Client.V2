@@ -66,23 +66,14 @@ public class AddonManager
 
 		if (entity is BaseCombatEntity combatEntity)
 		{
-			var combat = source.entity.combat;
-
-			if (combat != null)
+			if (source.entity.maxHealth != -1)
 			{
-				if (combat.maxHealth != -1)
-				{
-					combatEntity.SetMaxHealth(combat.maxHealth);
-				}
-
-				if (combat.health != -1)
-				{
-					combatEntity.SetHealth(combat.health);
-				}
+				combatEntity.SetMaxHealth(source.entity.maxHealth);
 			}
-			else
+
+			if (source.entity.health != -1)
 			{
-				Logger.Log($"Combat is null for {combatEntity.transform.GetRecursiveName()}");
+				combatEntity.SetHealth(source.entity.health);
 			}
 		}
 	}
@@ -112,7 +103,7 @@ public class AddonManager
 		{
 			var prefabInstance = CreateBasedOnImpl(prefab);
 
-			if (asset.cachedRustBundle.RustPrefabs.TryGetValue(path, out var rustPrefabs))
+			if (asset.cachedRustBundle.rustPrefabs.TryGetValue(path, out var rustPrefabs))
 			{
 				CreateRustPrefabs(prefabInstance.transform, rustPrefabs);
 			}
@@ -256,7 +247,7 @@ public class AddonManager
 		{
 			callback += go =>
 			{
-				if (asset.cachedRustBundle.RustPrefabs.TryGetValue(path, out var rustPrefabs))
+				if (asset.cachedRustBundle.rustPrefabs.TryGetValue(path, out var rustPrefabs))
 				{
 					CreateRustPrefabsAsync(go.transform, rustPrefabs);
 				}
