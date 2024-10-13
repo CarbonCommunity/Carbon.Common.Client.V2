@@ -4,6 +4,10 @@ namespace Carbon.Client;
 
 public struct NetworkId : IEqualityComparer<NetworkId>
 {
+	public static ulong lastValue = 1024;
+
+	public static NetworkId Next() => new(lastValue++);
+
 	public ulong Value;
 
 	public NetworkId(ulong value) => this.Value = value;
@@ -12,17 +16,14 @@ public struct NetworkId : IEqualityComparer<NetworkId>
 	{
 		return id.Equals(value);
 	}
-
 	public static bool operator !=(NetworkId id, NetworkId value)
 	{
 		return !id.Equals(value);
 	}
-
 	public static bool operator ==(NetworkId id, ulong value)
 	{
 		return id.Value == value;
 	}
-
 	public static bool operator !=(NetworkId id, ulong value)
 	{
 		return id.Value != value;
@@ -37,7 +38,6 @@ public struct NetworkId : IEqualityComparer<NetworkId>
 
 		return false;
 	}
-
 	public override int GetHashCode()
 	{
 		return (Value).GetHashCode();
@@ -47,7 +47,6 @@ public struct NetworkId : IEqualityComparer<NetworkId>
 	{
 		return x.Value == y.Value;
 	}
-
 	public int GetHashCode(NetworkId obj)
 	{
 		return obj.GetHashCode();

@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using Facepunch;
+using UnityEngine;
 
 namespace Carbon.Client;
 
 public class ServerNetwork : BaseNetwork
 {
-    public List<Connection> connections = new();
+	public static ServerNetwork ins = new();
+
+	public List<Connection> connections = new();
+
+	internal List<Connection> _connectionBuffer = new();
 
     public string ip { get; private set; }
     public int port { get; private set; }
@@ -39,12 +44,44 @@ public class ServerNetwork : BaseNetwork
 
     public virtual void OnShutdown()
     {
+		_connectionBuffer.Clear();
+		_connectionBuffer.AddRange(connections);
 
-    }
+		foreach (var connection in _connectionBuffer)
+		{
+			OnClientDisconnected(connection);
+		}
+	}
 
     public virtual void OnData(Connection connection)
     {
-    }
+		var read = connection.read;
+
+		read.StartRead();
+
+		if (!read.hasData)
+		{
+			return;
+		}
+
+		var message = read.Message();
+
+		if (message == MessageType.UNUSED)
+		{
+			return;
+		}
+
+		switch (message)
+		{
+
+
+			default:
+				Debug.LogError($"Unhandled MessageType received: {message}");
+				break;
+		}
+
+		connection.read?.EndRead();
+	}
 
     public virtual void NetworkUpdate()
     {
@@ -64,24 +101,24 @@ public class ServerNetwork : BaseNetwork
         }
     }
 
-    public virtual void Send(Connection connection, BaseNetworkable.SaveInfo data, MessageType msg)
+    public virtual void Send(Connection connection, BaseCarbonEntity.SaveInfo data, MessageType msg)
     {
-        // connection.write.Write(msg);
-        // data.msg.Serialize(connection.write);
-        // connection.write.Send();
-        // Pool.Free(ref data.msg);
+        connection.write.Write(msg);
+        data.msg.Serialize(connection.write);
+        connection.write.Send();
+        Pool.Free(ref data.msg);
     }
 
-    public virtual void Send(List<Connection> connections, BaseNetworkable.SaveInfo data, MessageType msg)
+    public virtual void Send(List<Connection> connections, BaseCarbonEntity.SaveInfo data, MessageType msg)
     {
-        // foreach (var client in connections)
-        // {
-        //     client.write.Write(msg);
-        //     data.msg.Serialize(client.write);
-        //     client.write.Send();
-        // }
-		// 
-        // Pool.Free(ref data.msg);
+        foreach (var client in connections)
+        {
+            client.write.Write(msg);
+            data.msg.Serialize(client.write);
+            client.write.Send();
+        }
+		
+        Pool.Free(ref data.msg);
     }
 
 	#endregion

@@ -15,6 +15,9 @@ public enum MessageType
 	UNUSED = 0,
 
 	Rpc,
+
+	EntityUpdate_Full,
+	EntityUpdate_Position
 }
 
 
