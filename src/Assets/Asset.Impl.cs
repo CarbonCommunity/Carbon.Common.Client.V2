@@ -8,8 +8,6 @@
 using System;
 using System.Collections;
 using System.IO;
-using Newtonsoft.Json;
-using ProtoBuf;
 using UnityEngine;
 using UnityEngine.Video;
 
@@ -32,8 +30,7 @@ public partial class Asset : IDisposable
 		cachedBundle = request.assetBundle;
 		Logger.Debug($"Unpacked bundle '{name}'", 2);
 
-		using var stream2 = new MemoryStream(additionalData);
-		cachedRustBundle = Serializer.Deserialize<RustBundle>(stream2);
+		cachedRustBundle = RustBundle.Deserialize(additionalData);
 
 		CacheAssets();
 	}
@@ -45,12 +42,14 @@ public partial class Asset : IDisposable
 			return;
 		}
 
-		using var stream = new MemoryStream(data);
-		cachedBundle = AssetBundle.LoadFromStream(stream);
-		Logger.Debug($"Unpacked bundle '{name}'", 2);
+		if (cachedBundle == null)
+		{
+			using var stream = new MemoryStream(data);
+			cachedBundle = AssetBundle.LoadFromStream(stream);
+		}
 
-		using var stream2 = new MemoryStream(additionalData);
-		cachedRustBundle = Serializer.Deserialize<RustBundle>(stream2);
+		Logger.Debug($"Unpacked bundle '{name}'", 2);
+		cachedRustBundle = RustBundle.Deserialize(additionalData);
 
 		CacheAssets();
 	}

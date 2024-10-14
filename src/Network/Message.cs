@@ -1,6 +1,4 @@
-﻿using Epic.OnlineServices.Platform;
-using Org.BouncyCastle.Crypto.Operators;
-using System.IO;
+﻿using System.IO;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -14,6 +12,7 @@ public enum MessageType
 	LAST = -1,
 	UNUSED = 0,
 
+	Approval,
 	Rpc,
 
 	EntityUpdate_Full,
@@ -49,14 +48,14 @@ public class NetWrite : BinaryWriter
 {
 	public NetWrite() { }
 	public NetWrite(Stream stream) : base(stream) { }
-	public NetWrite(CarbonConnection conn) : base(conn.stream)
+	public NetWrite(Connection conn) : base(conn.stream)
 	{
 		this.conn = conn;
 	}
 
 	public static MemoryStream stringBuffer = new();
 
-	public CarbonConnection conn;
+	public Connection conn;
 	public byte[] data;
 
 	public int length
@@ -344,12 +343,12 @@ public class NetRead : BinaryReader
 	public static byte[] byteBuffer = new byte[8388608];
 
 	public NetRead(Stream stream) : base(stream) { }
-	public NetRead(CarbonConnection conn) : base(conn.stream)
+	public NetRead(Connection conn) : base(conn.stream)
 	{
 		this.conn = conn;
 	}
 
-	public CarbonConnection conn;
+	public Connection conn;
 	public MessageType Type;
 	public byte[] data = new byte[8388608];
 	public int length

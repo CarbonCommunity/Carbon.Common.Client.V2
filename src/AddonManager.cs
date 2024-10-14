@@ -419,6 +419,7 @@ public class AddonManager
 	}
 
 	#endregion
+
 	public void Install(List<Addon> addons)
 	{
 		foreach (var addon in addons)

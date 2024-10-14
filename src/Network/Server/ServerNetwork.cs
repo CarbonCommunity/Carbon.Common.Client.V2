@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using Facepunch;
-using UnityEngine;
 
 namespace Carbon.Client;
 
-public class ServerNetwork : BaseNetwork
+public partial class ServerNetwork : BaseNetwork
 {
 	public static ServerNetwork ins = new();
 
-	public List<CarbonConnection> connections = new();
+	public List<Connection> connections = new();
 
-	internal List<CarbonConnection> _connectionBuffer = new();
+	internal List<Connection> _connectionBuffer = new();
 
     public string ip { get; private set; }
     public int port { get; private set; }
@@ -31,12 +30,12 @@ public class ServerNetwork : BaseNetwork
         port = int.Parse(split[1]);
     }
 
-    public virtual void OnClientConnected(CarbonConnection connection)
+    public virtual void OnClientConnected(Connection connection)
     {
         connections.Add(connection);
     }
 
-    public virtual void OnClientDisconnected(CarbonConnection connection)
+    public virtual void OnClientDisconnected(Connection connection)
     {
         connection.Disconnect();
         connections.Remove(connection);
@@ -53,7 +52,7 @@ public class ServerNetwork : BaseNetwork
 		}
 	}
 
-    public virtual void OnData(CarbonConnection connection)
+    public virtual void OnData(Connection connection)
     {
 		var read = connection.read;
 
@@ -73,7 +72,9 @@ public class ServerNetwork : BaseNetwork
 
 		switch (message)
 		{
-
+			case MessageType.Approval:
+				Message_Approval(connection.read);
+				break;
 
 			default:
 				Console.WriteLine($"[ERRO] Unhandled MessageType received: {message}");
@@ -87,7 +88,7 @@ public class ServerNetwork : BaseNetwork
     {
         if (net != null && net.Pending())
         {
-            OnClientConnected(CarbonConnection.Create(net.AcceptTcpClient()));
+            OnClientConnected(Connection.Create(net.AcceptTcpClient()));
         }
 
         foreach (var connection in connections)
@@ -101,7 +102,7 @@ public class ServerNetwork : BaseNetwork
         }
     }
 
-    public virtual void Send(CarbonConnection connection, BaseCarbonEntity.SaveInfo data, MessageType msg)
+    public virtual void Send(Connection connection, BaseCarbonEntity.SaveInfo data, MessageType msg)
     {
         connection.write.Write(msg);
         data.msg.Serialize(connection.write);
@@ -109,7 +110,7 @@ public class ServerNetwork : BaseNetwork
         Pool.Free(ref data.msg);
     }
 
-    public virtual void Send(List<CarbonConnection> connections, BaseCarbonEntity.SaveInfo data, MessageType msg)
+    public virtual void Send(List<Connection> connections, BaseCarbonEntity.SaveInfo data, MessageType msg)
     {
         foreach (var client in connections)
         {

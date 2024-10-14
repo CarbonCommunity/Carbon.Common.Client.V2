@@ -5,15 +5,18 @@ namespace Carbon.Client;
 
 public class GameManager : MonoBehaviour
 {
-	public static bool isServer;
-	public static Dictionary<uint, PrefabInfo> spawnablePrefabs = [];
+	public static GameManager ins;
 
-	public static void Initialize(bool isServer)
+	public bool isServer;
+	public Dictionary<uint, PrefabInfo> spawnablePrefabs = [];
+
+	public void Init(bool isServer)
 	{
-		GameManager.isServer = isServer;
+		ins = this;
+		this.isServer = isServer;
 	}
 
-	public static T CreateSpawnable<T>(uint assetId, Vector3 pos = default, Quaternion rot = default) where T : BaseCarbonEntity
+	public T CreateSpawnable<T>(uint assetId, Vector3 pos = default, Quaternion rot = default) where T : BaseCarbonEntity
 	{
 		if (spawnablePrefabs.TryGetValue(assetId, out var prefab))
 		{

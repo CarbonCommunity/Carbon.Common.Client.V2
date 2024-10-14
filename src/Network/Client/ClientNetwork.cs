@@ -15,7 +15,7 @@ public class ClientNetwork : BaseNetwork
 	public string ip { get; private set; }
 	public int port { get; private set; }
 
-	public CarbonConnection connection;
+	public Connection connection;
 
 	public bool IsConnected => net != null && net.Connected;
 	public bool HasData => connection != null && connection.stream != null && connection.stream.DataAvailable;
@@ -43,7 +43,7 @@ public class ClientNetwork : BaseNetwork
 
 		if (net != null && net.Connected)
 		{
-			connection = CarbonConnection.Create(net, true);
+			connection = Connection.Create(net, true);
 			OnConnect();
 		}
 		else
@@ -75,6 +75,11 @@ public class ClientNetwork : BaseNetwork
 
 	public virtual void OnConnect()
 	{
+		connection.write.Start(MessageType.Approval);
+		connection.write.Write(Steamworks.SteamClient.Name);
+		connection.write.Write(Steamworks.SteamClient.SteamId.Value);
+		connection.write.Send();
+
 	}
 
 	public virtual void OnConnectFail(SocketError socket)
