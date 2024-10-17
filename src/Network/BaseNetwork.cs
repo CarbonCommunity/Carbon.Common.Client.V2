@@ -1,8 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 
 namespace Carbon.Client;
 
-public class BaseNetwork
+public abstract class BaseNetwork
 {
 	public static ArrayPool<byte> BufferPool = new(8388608);
 
@@ -51,5 +52,12 @@ public class BaseNetwork
 		}
 
 		public int IndexToSize(int index) => 1 << index;
+	}
+
+	public abstract void OnNetwork();
+
+	public virtual void OnData(MessageType msg, Connection conn)
+	{
+		Console.WriteLine($"[ERRO] Unhandled MessageType received: {msg}");
 	}
 }

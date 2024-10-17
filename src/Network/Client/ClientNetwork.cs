@@ -1,146 +1,76 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Carbon.Client;
 
-public class ClientNetwork : BaseNetwork
+public partial class ClientNetwork : BaseNetwork
 {
 	public static ClientNetwork ins = new();
 
-	public TcpClient net = new();
+	public TcpListener net;
 
-	public string ip { get; private set; }
-	public int port { get; private set; }
+	public Connection serverConnection;
 
-	public Connection connection;
+	public bool IsConnected => net != null;
 
-	public bool IsConnected => net != null && net.Connected;
-	public bool HasData => connection != null && connection.stream != null && connection.stream.DataAvailable;
-
-	public async ValueTask<bool> Connect(string ip, int port)
+	public void Start()
 	{
-		net = new();
+		if (IsConnected)
+		{
+			Console.WriteLine($"Attempted to start the server while it's already connected.");
+			return;
+		}
+
+		net = new(IPAddress.Parse("127.0.0.1"), Carbon.Client.Port.VALUE);
 
 		try
 		{
-			if (ip == "localhost")
-			{
-				ip = "127.0.0.1";
-			}
-
-			this.ip = ip;
-			this.port = port;
-			await net.ConnectAsync(IPAddress.Parse(ip), port);
-		}
-		catch (SocketException exception)
-		{
-			OnConnectFail(exception.SocketErrorCode);
-			return false;
-		}
-
-		if (net != null && net.Connected)
-		{
-			connection = Connection.Create(net, true);
-			OnConnect();
-		}
-		else
-		{
-			OnConnectFail(SocketError.NotConnected);
-			return false;
-		}
-
-		return net.Connected;
-	}
-
-	public void Shutdown(string reason)
-	{
-		if (net == null)
-		{
-			return;
-		}
-
-		connection?.Disconnect();
-
-		Console.WriteLine($"Client shutdown: {reason}");
-		OnShutdown();
-
-		connection = null;
-		net = null;
-	}
-
-	#region Hooks
-
-	public virtual void OnConnect()
-	{
-		connection.write.Start(MessageType.Approval);
-		connection.write.Write(Steamworks.SteamClient.Name);
-		connection.write.Write(Steamworks.SteamClient.SteamId.Value);
-		connection.write.Send();
-
-	}
-
-	public virtual void OnConnectFail(SocketError socket)
-	{
-		Console.WriteLine($"[ERRO] Couldn't connect ({socket})");
-	}
-
-	public virtual void OnShutdown()
-	{
-
-	}
-
-	public virtual void NetworkUpdate()
-	{
-		if (net == null || connection == null)
-		{
-			return;
-		}
-
-		try
-		{
-			if (!HasData)
-			{
-				return;
-			}
-		}
-		catch (ObjectDisposedException)
-		{
-			Shutdown($"Timed out");
-			return;
+			net.Start();
 		}
 		catch (Exception ex)
 		{
-			Shutdown($"{ex.Message}\n{ex.StackTrace}");
-			return;
+			Console.WriteLine($"Failed starting server", ex);
+		}
+	}
+
+	public override void OnNetwork()
+	{
+		if (net != null && net.Pending())
+		{
+			serverConnection = Connection.Create(net.AcceptTcpClient());
 		}
 
-		connection.read.StartRead();
-
-		if (!connection.read.hasData)
+		if(serverConnection == null || !serverConnection.IsConnected || !serverConnection.HasData)
 		{
 			return;
 		}
 
-		var message = connection.read.Message();
+		var read = serverConnection.read;
+
+		read.StartRead();
+
+		if (!read.hasData)
+		{
+			return;
+		}
+
+		var message = read.Message();
 
 		if (message == MessageType.UNUSED)
 		{
 			return;
 		}
 
-		switch (message)
+		try
 		{
-
-			default:
-				Console.WriteLine($"Unhandled MessageType received: {message}");
-				break;
+			OnData(message, serverConnection);
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine($"[ERRO] Failed processing network message packet '{message}' ({ex.Message})\n{ex.StackTrace}");
 		}
 
-		connection?.read?.EndRead();
+		serverConnection.read?.EndRead();
 	}
-
-	#endregion
 }

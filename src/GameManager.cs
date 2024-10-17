@@ -32,12 +32,12 @@ public class GameManager : MonoBehaviour
 	{
 		if (ServerNetwork.ins != null)
 		{
-			ServerNetwork.ins.NetworkUpdate();
+			ServerNetwork.ins.OnNetwork();
 		}
 
 		if (ClientNetwork.ins != null)
 		{
-			ClientNetwork.ins.NetworkUpdate();
+			ClientNetwork.ins.OnNetwork();
 		}
 	}
 

@@ -35,7 +35,7 @@ public class Connection
 		net = null;
 	}
 
-	public static Connection Create(TcpClient client, bool isLocal = false)
+	public static Connection Create(TcpClient client)
 	{
 		var nc = new Connection();
 		nc.net = client;
