@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Carbon.Client
 {
+	[Serializable]
 	public partial class RustPrefab
 	{
 		public string rustPath;
@@ -14,6 +15,7 @@ namespace Carbon.Client
 		public EntityData entity;
 		public ModelData model;
 
+		[Serializable]
 		public class EntityData
 		{
 			public bool enforcePrefab;
@@ -53,6 +55,8 @@ namespace Carbon.Client
 				Transferring = 33554432
 			}
 		}
+
+		[Serializable]
 		public class ModelData
 		{
 			#region Editor
