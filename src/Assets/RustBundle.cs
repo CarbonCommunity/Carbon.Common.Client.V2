@@ -43,6 +43,7 @@ namespace Carbon.Client
 						writer.Write(value.entity.skin);
 						writer.Write(value.entity.health);
 						writer.Write(value.entity.maxHealth);
+						writer.Write(value.model.PrefabPath);
 					}
 				}
 
@@ -103,6 +104,8 @@ namespace Carbon.Client
 					prefab.entity.skin = reader.ReadUInt64();
 					prefab.entity.health = reader.ReadSingle();
 					prefab.entity.maxHealth = reader.ReadSingle();
+					prefab.model = new();
+					prefab.model.PrefabPath = reader.ReadString();
 				}
 			}
 

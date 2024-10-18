@@ -12,6 +12,7 @@ namespace Carbon.Client
 		public Vector3 rotation;
 		public Vector3 scale;
 		public EntityData entity;
+		public ModelData model;
 
 		public class EntityData
 		{
@@ -51,6 +52,19 @@ namespace Carbon.Client
 				Protected = 16777216,
 				Transferring = 33554432
 			}
+		}
+		public class ModelData
+		{
+			#region Editor
+
+			public GameObject prefabReference;
+
+			#endregion
+
+#if UNITY_EDITOR
+			[HideInInspector]
+#endif
+			public string PrefabPath;
 		}
 	}
 }
