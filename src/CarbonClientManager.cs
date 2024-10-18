@@ -5,12 +5,15 @@ using Carbon.Client.SDK;
 using Steamworks.ServerList;
 using System.Linq;
 using Carbon.Extensions;
+using System.Net;
 
 namespace Carbon.Client;
 
 public class CarbonClientManager : ICarbonClientManager
 {
-	public Dictionary<Network.Connection, ICarbonClient> Clients { get; } = new();
+	public static CarbonClientManager ins;
+
+	public Dictionary<Network.Connection, CarbonClient> Clients { get; } = [];
 
 	internal const string _PATCH_NAME = "com.carbon.clientpatch";
 	internal HarmonyLib.Harmony _PATCH;
@@ -24,11 +27,13 @@ public class CarbonClientManager : ICarbonClientManager
 
 	public void Init()
 	{
+		ins = this;
+
 		Community.Runtime.Core.timer.Every(2f, () =>
 		{
 			foreach (var client in Clients)
 			{
-				if (client.Value.HasCarbonClient && client.Value.IsConnected && client.Value.IsDownloadingAddons && client.Value.Player != null)
+				if (client.Value.IsCarbonConnected && client.Value.IsConnected && client.Value.IsDownloadingAddons && client.Value.Player != null)
 				{
 					client.Value.Player.ClientKeepConnectionAlive(default);
 				}
@@ -61,17 +66,17 @@ public class CarbonClientManager : ICarbonClientManager
 
 		if (!client.IsConnected)
 		{
-			Logger.Warn($"Client {client.Connection?.username}[{client.Connection?.userid}] is not connected to deliver ping.");
+			Logger.Warn($"Client {client.Connection?.username}[{client.Connection?.userid}] is not connected.");
 			return;
 		}
 
-		if (client.HasCarbonClient)
+		if (client.IsCarbonConnected)
 		{
 			Logger.Warn($"Already connected with Carbon for client {client.Connection?.username}[{client.Connection?.userid}].");
 			return;
 		}
 
-		// Ping
+		client.OnConnected();
 	}
 	public void OnDisconnected(Network.Connection connection)
 	{
@@ -85,7 +90,7 @@ public class CarbonClientManager : ICarbonClientManager
 		}
 	}
 
-	public ICarbonClient Get(Network.Connection connection)
+	public ICarbonConnection Get(Network.Connection connection)
 	{
 		if (connection == null)
 		{
@@ -94,7 +99,7 @@ public class CarbonClientManager : ICarbonClientManager
 
 		if (!Clients.TryGetValue(connection, out var client))
 		{
-			Clients.Add(connection, client = Make(connection));
+			Clients.Add(connection, client = Make(connection) as CarbonClient);
 		}
 
 		if (client.Player == null)
@@ -104,7 +109,7 @@ public class CarbonClientManager : ICarbonClientManager
 
 		return client;
 	}
-	public ICarbonClient Get(BasePlayer player)
+	public ICarbonConnection Get(BasePlayer player)
 	{
 		var client = Get(player?.Connection);
 		client.Player = player;
@@ -120,7 +125,7 @@ public class CarbonClientManager : ICarbonClientManager
 			return false;
 		}
 
-		return client.HasCarbonClient;
+		return client.IsCarbonConnected;
 	}
 	public bool IsCarbonClient(Network.Connection connection)
 	{
@@ -131,7 +136,7 @@ public class CarbonClientManager : ICarbonClientManager
 			return false;
 		}
 
-		return client.HasCarbonClient;
+		return client.IsCarbonConnected;
 	}
 
 	public void SendRequestsToAllPlayers(bool uninstallAll = true, bool loadingScreen = true)
@@ -151,7 +156,7 @@ public class CarbonClientManager : ICarbonClientManager
 
 		var client = connection.ToCarbonClient() as CarbonClient;
 
-		if (!client.HasCarbonClient || client.IsDownloadingAddons)
+		if (!client.IsCarbonConnected || client.IsDownloadingAddons)
 		{
 			return;
 		}
@@ -184,7 +189,7 @@ public class CarbonClientManager : ICarbonClientManager
 		AddonManager.Instance.Uninstall();
 	}
 
-	public void DisposeClient(ICarbonClient client)
+	public void DisposeClient(ICarbonConnection client)
 	{
 		if (Clients.ContainsKey(client.Connection))
 		{
@@ -193,7 +198,7 @@ public class CarbonClientManager : ICarbonClientManager
 		}
 	}
 
-	internal static ICarbonClient Make(Network.Connection connection)
+	internal static ICarbonConnection Make(Network.Connection connection)
 	{
 		if (connection == null)
 		{

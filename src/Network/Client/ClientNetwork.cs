@@ -10,7 +10,7 @@ public partial class ClientNetwork : BaseNetwork
 
 	public TcpListener net;
 
-	public Connection serverConnection;
+	public CarbonServer serverConnection;
 
 	public bool IsConnected => net != null;
 
@@ -22,11 +22,12 @@ public partial class ClientNetwork : BaseNetwork
 			return;
 		}
 
-		net = new(IPAddress.Parse("127.0.0.1"), Carbon.Client.Port.VALUE);
+		net = new(IPAddress.Parse("127.0.0.1"), Port.VALUE);
 
 		try
 		{
 			net.Start();
+			Console.WriteLine($"Started C4C connection @ 127.0.0.1:{Port.VALUE}.. Ready for C4C server!");
 		}
 		catch (Exception ex)
 		{
@@ -38,15 +39,23 @@ public partial class ClientNetwork : BaseNetwork
 	{
 		if (net != null && net.Pending())
 		{
-			serverConnection = Connection.Create(net.AcceptTcpClient());
+			var conn = net.AcceptTcpClient();
+			var stream = conn.GetStream();
+			serverConnection = new()
+			{
+				Net = conn,
+				Stream = stream,
+				Write = new(stream),
+				Read = new(stream)
+			};
 		}
 
-		if(serverConnection == null || !serverConnection.IsConnected || !serverConnection.HasData)
+		if(serverConnection == null || !serverConnection.IsCarbonConnected || !serverConnection.HasData)
 		{
 			return;
 		}
 
-		var read = serverConnection.read;
+		var read = serverConnection.Read;
 
 		read.StartRead();
 
@@ -57,7 +66,7 @@ public partial class ClientNetwork : BaseNetwork
 
 		var message = read.Message();
 
-		if (message == MessageType.UNUSED)
+		if (message == Messages.UNUSED)
 		{
 			return;
 		}
@@ -71,6 +80,11 @@ public partial class ClientNetwork : BaseNetwork
 			Console.WriteLine($"[ERRO] Failed processing network message packet '{message}' ({ex.Message})\n{ex.StackTrace}");
 		}
 
-		serverConnection.read?.EndRead();
+		serverConnection.Read?.EndRead();
+	}
+
+	public virtual void OnData(Messages msg, CarbonServer conn)
+	{
+		Console.WriteLine($"[ERRO] Unhandled MessageType received: {msg}");
 	}
 }

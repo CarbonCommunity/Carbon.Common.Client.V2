@@ -4,20 +4,22 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System;
 using UnityEngine;
+using Carbon.Client.SDK;
 
 namespace Carbon.Client;
 
 public class NetWrite : BinaryWriter
 {
 	public NetWrite() { }
-	public NetWrite(Connection conn) : base(conn.stream)
+	public NetWrite(Stream stream) : base(stream) { }
+	public NetWrite(ICarbonConnection conn) : base(conn.Stream)
 	{
 		this.conn = conn;
 	}
 
 	public static MemoryStream stringBuffer = new();
 
-	public Connection conn;
+	public ICarbonConnection conn;
 	public byte[] data;
 
 	public int length
@@ -25,7 +27,7 @@ public class NetWrite : BinaryWriter
 		get => _length;
 		set => _length = value;
 	}
-	public MessageType type;
+	public Messages type;
 
 	private int _position;
 	private int _length;
@@ -58,7 +60,7 @@ public class NetWrite : BinaryWriter
 		}
 	}
 
-	public void Message(MessageType msg)
+	public void Message(Messages msg)
 	{
 		Write((int)msg);
 	}
@@ -175,7 +177,7 @@ public class NetWrite : BinaryWriter
 		this.length = length;
 	}
 
-	public void Start(MessageType msg)
+	public void Start(Messages msg)
 	{
 		Clear();
 		Message(type = msg);
@@ -218,20 +220,18 @@ public class NetWrite : BinaryWriter
 			Color(GenericsEx.Cast<T, Color>(val));
 		else if (typeof(T) == typeof(Color32))
 			Color32(GenericsEx.Cast<T, Color32>(val));
-		else if (typeof(T) == typeof(MessageType))
-			Message(GenericsEx.Cast<T, MessageType>(val));
+		else if (typeof(T) == typeof(Messages))
+			Message(GenericsEx.Cast<T, Messages>(val));
 		else if (typeof(T) == typeof(NetworkId))
 			NetworkId(GenericsEx.Cast<T, NetworkId>(val));
 		else
 			Console.WriteLine($"[ERRO] NetworkData.Write - no handler to write {val} -> {val.GetType()}");
 	}
-	public void End() => Int32((int)MessageType.LAST);
+	public void End() => Int32((int)Messages.LAST);
 	public void Send(bool clear = true)
 	{
-		if (!conn.IsConnected)
+		if (conn != null && !conn.IsCarbonConnected)
 		{
-			conn.Disconnect();
-
 			if (clear)
 			{
 				Clear();
@@ -246,11 +246,11 @@ public class NetWrite : BinaryWriter
 		}
 		catch (IOException)
 		{
-			conn.Disconnect();
+			conn?.DisconnectCarbon("IO except");
 		}
 		catch (SocketException)
 		{
-			conn.Disconnect();
+			conn?.DisconnectCarbon("Socket brr");
 		}
 		finally
 		{
@@ -305,13 +305,13 @@ public class NetRead : BinaryReader
 	public static byte[] byteBuffer = new byte[8388608];
 
 	public NetRead(Stream stream) : base(stream) { }
-	public NetRead(Connection conn) : base(conn.stream)
+	public NetRead(ICarbonConnection conn) : base(conn.Stream)
 	{
 		this.conn = conn;
 	}
 
-	public Connection conn;
-	public MessageType Type;
+	public ICarbonConnection conn;
+	public Messages Type;
 	public byte[] data = new byte[8388608];
 	public int length
 	{
@@ -330,7 +330,7 @@ public class NetRead : BinaryReader
 	private int _position;
 	private int _length;
 
-	public MessageType Message() => Type = (MessageType)Int32();
+	public Messages Message() => Type = (Messages)Int32();
 	public NetworkId NetworkId() => new(UInt64());
 	public byte UInt8() => ReadUnmanaged<byte>();
 	public ushort UInt16() => ReadUnmanaged<ushort>();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using Carbon.Client.SDK;
 
 namespace Carbon.Client;
 
@@ -55,9 +56,4 @@ public abstract class BaseNetwork
 	}
 
 	public abstract void OnNetwork();
-
-	public virtual void OnData(MessageType msg, Connection conn)
-	{
-		Console.WriteLine($"[ERRO] Unhandled MessageType received: {msg}");
-	}
 }

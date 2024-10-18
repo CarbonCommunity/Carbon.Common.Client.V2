@@ -14,6 +14,11 @@ public class GameManager : MonoBehaviour
 	{
 		ins = this;
 		this.isServer = isServer;
+
+		if (!isServer)
+		{
+			ClientNetwork.ins.Start();
+		}
 	}
 
 	public T CreateSpawnable<T>(uint assetId, Vector3 pos = default, Quaternion rot = default) where T : BaseCarbonEntity
@@ -30,12 +35,12 @@ public class GameManager : MonoBehaviour
 
 	public void Update()
 	{
-		if (ServerNetwork.ins != null)
+		if (isServer && ServerNetwork.ins != null)
 		{
 			ServerNetwork.ins.OnNetwork();
 		}
 
-		if (ClientNetwork.ins != null)
+		if (!isServer && ClientNetwork.ins != null)
 		{
 			ClientNetwork.ins.OnNetwork();
 		}
