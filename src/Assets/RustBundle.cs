@@ -8,6 +8,7 @@ namespace Carbon.Client
 	public partial class RustBundle
 	{
 		public Dictionary<string, List<RustPrefab>> rustPrefabs = new Dictionary<string, List<RustPrefab>>();
+		public Dictionary<string, List<RustComponent>> components = new Dictionary<string, List<RustComponent>>();
 
 		public byte[] Serialize()
 		{
@@ -17,7 +18,6 @@ namespace Carbon.Client
 				using var writer = new BinaryWriter(gzipStream);
 
 				writer.Write(rustPrefabs.Count);
-
 				foreach(var prefab in rustPrefabs)
 				{
 					writer.Write(prefab.Key);
@@ -45,6 +45,30 @@ namespace Carbon.Client
 						writer.Write(value.entity.maxHealth);
 					}
 				}
+
+				writer.Write(components.Count);
+				foreach(var component in components)
+				{
+					writer.Write(component.Key);
+					writer.Write(component.Value.Count);
+
+					foreach (var value in component.Value)
+					{
+						writer.Write((int)value.Server);
+						writer.Write((int)value.Client);
+						writer.Write(value.Component.CreateOn.Client);
+						writer.Write(value.Component.CreateOn.Server);
+						writer.Write(value.Component.Type);
+						writer.Write(value.Component.Members.Length);
+						foreach(var member in value.Component.Members)
+						{
+							writer.Write(member.Name);
+							writer.Write(member.Value);
+						}
+						writer.Write(value.Behavior.AutoDisableTimer);
+						writer.Write(value.Behavior.AutoDestroyTimer);
+					}
+				}
 			}
 
 			return memoryStream.ToArray();
@@ -58,8 +82,8 @@ namespace Carbon.Client
 			using var gzipStream = new GZipStream(memoryStream, CompressionMode.Decompress);
 			using var reader = new BinaryReader(gzipStream);
 
-			var count = reader.ReadInt32();
-			for(int i = 0; i < count; i++)
+			var rustPrefabCount = reader.ReadInt32();
+			for(int i = 0; i < rustPrefabCount; i++)
 			{
 				var list = new List<RustPrefab>();
 				bundle.rustPrefabs.Add(reader.ReadString(), list);
@@ -79,6 +103,33 @@ namespace Carbon.Client
 					prefab.entity.skin = reader.ReadUInt64();
 					prefab.entity.health = reader.ReadSingle();
 					prefab.entity.maxHealth = reader.ReadSingle();
+				}
+			}
+
+			var componentCount = reader.ReadInt32();
+			for(int i = 0; i < componentCount; i++)
+			{
+				var list = new List<RustComponent>();
+				bundle.components.Add(reader.ReadString(), list);
+
+				var listCount = reader.ReadInt32();
+				for(int j = 0; j < listCount; j++)
+				{
+					var component = new RustComponent();
+					component.Client = (RustComponent.PostProcessMode)reader.ReadInt32();
+					component.Server = (RustComponent.PostProcessMode)reader.ReadInt32();
+					component.Component.CreateOn.Client = reader.ReadBoolean();
+					component.Component.CreateOn.Server = reader.ReadBoolean();
+					component.Component.Type = reader.ReadString();
+					component.Component.Members = new RustComponent.Member[reader.ReadInt32()];
+					for (int k = 0; k < component.Component.Members.Length; k++)
+					{
+						var member = component.Component.Members[k] = new();
+						member.Name = reader.ReadString();
+						member.Value = reader.ReadString();
+					}
+					component.Behavior.AutoDisableTimer = reader.ReadSingle();
+					component.Behavior.AutoDestroyTimer = reader.ReadSingle();
 				}
 			}
 

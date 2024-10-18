@@ -139,17 +139,16 @@ public class CarbonClientManager : ICarbonClientManager
 		return client.IsCarbonConnected;
 	}
 
-	public void SendRequestsToAllPlayers(bool uninstallAll = true, bool loadingScreen = true)
+	public void SendRequestsToAllPlayers(bool uninstallAll = true)
 	{
 		foreach (var player in BasePlayer.activePlayerList)
 		{
-			SendRequestToPlayer(player.Connection, uninstallAll, loadingScreen);
+			SendRequestToPlayer(player.Connection, uninstallAll);
 		}
 	}
-	public void SendRequestToPlayer(Network.Connection connection, bool uninstallAll = true, bool loadingScreen = true)
+	public void SendRequestToPlayer(Network.Connection connection, bool uninstallAll = true)
 	{
-		if (connection == null ||
-			AddonManager.Instance.LoadedAddons.Count == 0)
+		if (connection == null || AddonManager.Instance.LoadedAddons.Count == 0)
 		{
 			return;
 		}
@@ -161,7 +160,15 @@ public class CarbonClientManager : ICarbonClientManager
 			return;
 		}
 
-		// asd
+		client.Write.Start(Messages.AddonLoad);
+		client.Write.Bool(uninstallAll);
+		client.Write.Int32(AddonManager.Instance.LoadedAddons.Count);
+		foreach (var addon in AddonManager.Instance.LoadedAddons)
+		{
+			var manifest = addon.Key.GetManifest();
+			manifest.Save(client.Write);
+		}
+		client.Write.Send();
 	}
 
 	public async void InstallAddons(string[] urls)

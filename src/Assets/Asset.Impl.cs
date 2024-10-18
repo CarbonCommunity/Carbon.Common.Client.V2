@@ -31,6 +31,7 @@ public partial class Asset : IDisposable
 		Logger.Debug($"Unpacked bundle '{name}'", 2);
 
 		cachedRustBundle = RustBundle.Deserialize(additionalData);
+		cachedRustBundle.ProcessComponents(this);
 
 		CacheAssets();
 	}
@@ -50,6 +51,7 @@ public partial class Asset : IDisposable
 
 		Logger.Debug($"Unpacked bundle '{name}'", 2);
 		cachedRustBundle = RustBundle.Deserialize(additionalData);
+		cachedRustBundle.ProcessComponents(this);
 
 		CacheAssets();
 	}
@@ -105,7 +107,7 @@ public partial class Asset : IDisposable
 
 			if (component != null)
 			{
-				GameObject.Destroy(component);
+				UnityEngine.Object.Destroy(component);
 			}
 		}
 

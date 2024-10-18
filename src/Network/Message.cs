@@ -6,5 +6,5 @@ public enum Messages
 	UNUSED = 0,
 
 	Approval,
-
+	AddonLoad
 }

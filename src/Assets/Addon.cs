@@ -214,7 +214,7 @@ namespace Carbon.Client.Assets
 			checksum = result;
 		}
 
-		public class Manifest
+		public partial class Manifest
 		{
 			public AddonInfo info;
 			public Asset.Manifest[] assets;
