@@ -18,18 +18,21 @@ namespace Carbon.Client
 			Destroyed
 		}
 
+		[Serializable]
 		public class Member
 		{
 			public string Name;
 			public string Value;
 		}
 
+		[Serializable]
 		public class Platform
 		{
 			public bool Server;
 			public bool Client;
 		}
 
+		[Serializable]
 		public class ComponentInfo
 		{
 			public Platform CreateOn = new();
@@ -37,6 +40,7 @@ namespace Carbon.Client
 			public Member[] Members;
 		}
 
+		[Serializable]
 		public class BehaviorInfo
 		{
 			public float AutoDisableTimer = 0;
