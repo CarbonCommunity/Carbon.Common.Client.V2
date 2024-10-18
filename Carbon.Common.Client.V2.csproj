@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build">
 	<PropertyGroup>
-		<Product>Carbon.Common.Client</Product>
+		<Product>Carbon.Common.Client.V2</Product>
 		<OutputType>Library</OutputType>
 		<ProjectGuid>{30B4B72A-9E9A-422D-9FDE-98DDD677B1AE}</ProjectGuid>
 	</PropertyGroup>
