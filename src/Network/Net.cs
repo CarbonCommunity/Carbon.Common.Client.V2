@@ -10,7 +10,6 @@ namespace Carbon.Client;
 public class NetWrite : BinaryWriter
 {
 	public NetWrite() { }
-	public NetWrite(Stream stream) : base(stream) { }
 	public NetWrite(Connection conn) : base(conn.stream)
 	{
 		this.conn = conn;
