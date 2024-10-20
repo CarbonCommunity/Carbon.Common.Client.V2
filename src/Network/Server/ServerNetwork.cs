@@ -58,12 +58,16 @@ public partial class ServerNetwork : BaseNetwork
 			conn.Read.EndRead();
 		}
 	}
-	public virtual void OnData(Messages msg, CarbonClient conn)
+	public virtual void OnData(Messages msg, CarbonClientConnection conn)
 	{
 		switch (msg)
 		{
 			case Messages.Approval:
 				Message_Approval(conn);
+				break;
+
+			case Messages.AddonsLoaded:
+				Message_AddonsLoaded(conn);
 				break;
 
 			default:

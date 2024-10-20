@@ -2,8 +2,12 @@
 
 namespace Carbon.Client;
 
-public class CarbonServer
+public class CarbonServerConnection
 {
+	public ulong UserId { get; set; }
+	public string Username { get; set; }
+	public string Ip { get; set; }
+
 	public TcpClient Net { get; set; }
 	public NetworkStream Stream { get; set; }
 	public NetRead Read { get; set; }

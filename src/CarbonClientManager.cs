@@ -13,7 +13,7 @@ public class CarbonClientManager : ICarbonClientManager
 {
 	public static CarbonClientManager ins;
 
-	public Dictionary<Network.Connection, CarbonClient> Clients { get; } = [];
+	public Dictionary<ulong, CarbonClientConnection> Clients { get; } = [];
 
 	internal const string _PATCH_NAME = "com.carbon.clientpatch";
 	internal HarmonyLib.Harmony _PATCH;
@@ -33,7 +33,7 @@ public class CarbonClientManager : ICarbonClientManager
 		{
 			foreach (var client in Clients)
 			{
-				if (client.Value.IsCarbonConnected && client.Value.IsConnected && client.Value.IsDownloadingAddons && client.Value.Player != null)
+				if (client.Value.IsCarbonConnected && client.Value.IsDownloadingAddons && client.Value.Player != null)
 				{
 					client.Value.Player.ClientKeepConnectionAlive(default);
 				}
@@ -64,19 +64,13 @@ public class CarbonClientManager : ICarbonClientManager
 			return;
 		}
 
-		if (!client.IsConnected)
-		{
-			Logger.Warn($"Client {client.Connection?.username}[{client.Connection?.userid}] is not connected.");
-			return;
-		}
-
 		if (client.IsCarbonConnected)
 		{
-			Logger.Warn($"Already connected with Carbon for client {client.Connection?.username}[{client.Connection?.userid}].");
+			Logger.Warn($"Already connected with Carbon for client {client.Username}[{client.UserId}].");
 			return;
 		}
 
-		client.OnConnected();
+		client.OnConnected(connection.userid, connection.username, connection.IPAddressWithoutPort());
 	}
 	public void OnDisconnected(Network.Connection connection)
 	{
@@ -97,14 +91,14 @@ public class CarbonClientManager : ICarbonClientManager
 			return null;
 		}
 
-		if (!Clients.TryGetValue(connection, out var client))
+		if (!Clients.TryGetValue(connection.guid, out var client))
 		{
-			Clients.Add(connection, client = Make(connection) as CarbonClient);
+			Clients.Add(connection.guid, client = Make(connection) as CarbonClientConnection);
 		}
 
 		if (client.Player == null)
 		{
-			client.Player = BasePlayer.FindAwakeOrSleeping(client.Connection.userid.ToString());
+			client.Player = BasePlayer.FindAwakeOrSleeping(client.UserId.ToString());
 		}
 
 		return client;
@@ -153,14 +147,14 @@ public class CarbonClientManager : ICarbonClientManager
 			return;
 		}
 
-		var client = connection.ToCarbonClient() as CarbonClient;
+		var client = connection.ToCarbonClient() as CarbonClientConnection;
 
 		if (!client.IsCarbonConnected || client.IsDownloadingAddons)
 		{
 			return;
 		}
 
-		client.Write.Start(Messages.AddonLoad);
+		client.Write.Start(Messages.AddonsLoading);
 		client.Write.Bool(uninstallAll);
 		client.Write.Int32(AddonManager.Instance.LoadedAddons.Count);
 		foreach (var addon in AddonManager.Instance.LoadedAddons)
@@ -169,6 +163,9 @@ public class CarbonClientManager : ICarbonClientManager
 			manifest.Save(client.Write);
 		}
 		client.Write.Send();
+
+		// OnClientAddonsDownload
+		HookCaller.CallStaticHook(1982270422, connection.ToCarbonClient());
 	}
 
 	public async void InstallAddons(string[] urls)
@@ -212,9 +209,12 @@ public class CarbonClientManager : ICarbonClientManager
 			return null;
 		}
 
-		return new CarbonClient
+		return new CarbonClientConnection
 		{
-			Connection = connection,
+			UserId = connection.userid,
+			Username = connection.username,
+			Ip = connection.IPAddressWithoutPort(),
+			Connection = connection.guid,
 			Player = connection.player as BasePlayer
 		};
 	}

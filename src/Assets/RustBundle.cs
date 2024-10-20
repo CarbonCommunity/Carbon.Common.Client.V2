@@ -95,6 +95,7 @@ namespace Carbon.Client
 					var prefab = new RustPrefab();
 					prefab.rustPath = reader.ReadString();
 					prefab.parentPath = reader.ReadString();
+					prefab.parent = reader.ReadBoolean();
 					prefab.position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
 					prefab.rotation = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
 					prefab.scale = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
@@ -106,6 +107,7 @@ namespace Carbon.Client
 					prefab.entity.maxHealth = reader.ReadSingle();
 					prefab.model = new();
 					prefab.model.PrefabPath = reader.ReadString();
+					list.Add(prefab);
 				}
 			}
 
@@ -133,6 +135,7 @@ namespace Carbon.Client
 					}
 					component.Behavior.AutoDisableTimer = reader.ReadSingle();
 					component.Behavior.AutoDestroyTimer = reader.ReadSingle();
+					list.Add(component);
 				}
 			}
 

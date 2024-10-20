@@ -10,9 +10,9 @@ public partial class ClientNetwork : BaseNetwork
 
 	public TcpListener net;
 
-	public CarbonServer serverConnection;
+	public CarbonServerConnection serverConnection;
 
-	public bool IsConnected => net != null;
+	public bool IsConnected => net != null && net.Server != null && net.Server.Connected;
 
 	public void Start()
 	{
@@ -83,7 +83,7 @@ public partial class ClientNetwork : BaseNetwork
 		serverConnection.Read?.EndRead();
 	}
 
-	public virtual void OnData(Messages msg, CarbonServer conn)
+	public virtual void OnData(Messages msg, CarbonServerConnection conn)
 	{
 		Console.WriteLine($"[ERRO] Unhandled MessageType received: {msg}");
 	}

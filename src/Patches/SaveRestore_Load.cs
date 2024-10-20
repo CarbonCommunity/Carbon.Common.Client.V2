@@ -11,6 +11,9 @@ public class SaveRestore_Load
 	{
 		if (Community.Runtime.ClientConfig.Enabled)
 		{
+			Carbon.Client.GameManager.ins = ServerMgr.Instance.gameObject.AddComponent<Carbon.Client.GameManager>();
+			Carbon.Client.GameManager.ins.Init(true);
+
 			CorePlugin.ReloadCarbonClientAddons(false);
 		}
 	}

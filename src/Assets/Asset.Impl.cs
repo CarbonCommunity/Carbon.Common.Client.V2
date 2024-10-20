@@ -67,6 +67,7 @@ public partial class Asset : IDisposable
 				AddonManager.CachePrefab cache = default;
 				cache.Path = asset;
 				cache.Object = cachedBundle.LoadAsset<GameObject>(asset);
+				GameManager.ins.RegisterPrefab(processedAssetPath, cache.Object);
 
 				ProcessClientObjects(cache.Object.transform);
 

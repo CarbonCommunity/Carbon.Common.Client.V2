@@ -462,26 +462,46 @@ public class AddonManager
 	{
 		if (rustPrefabs)
 		{
-			if (CreatedRustPrefabs.Count != 0) Console.WriteLine($" C4C: Cleared {CreatedRustPrefabs.Count:n0} Rust {CreatedRustPrefabs.Count.Plural("prefab", "prefabs")}");
+			if (CreatedRustPrefabs.Count != 0)
+			{
+				Console.WriteLine($" C4C: Cleared {CreatedRustPrefabs.Count:n0} Rust {CreatedRustPrefabs.Count.Plural("prefab", "prefabs")}");
+			}
+
 			ClearRustPrefabs();
 		}
 		if (prefabs)
 		{
-			if (CreatedPrefabs.Count != 0) Console.WriteLine($" C4C: Cleared {CreatedPrefabs.Count:n0} {CreatedPrefabs.Count.Plural("prefab", "prefabs")}");
+			if (CreatedPrefabs.Count != 0)
+			{
+				Console.WriteLine($" C4C: Cleared {CreatedPrefabs.Count:n0} {CreatedPrefabs.Count.Plural("prefab", "prefabs")}");
+			}
+
 			ClearPrefabs();
 		}
 		if (customPrefabs)
 		{
-			if (Prefabs.Count != 0) Console.WriteLine($" C4C: Cleared {Prefabs.Count:n0} custom prefab cache {Prefabs.Count.Plural("element", "elements")}");
+			if (Prefabs.Count != 0)
+			{
+				Console.WriteLine($" C4C: Cleared {Prefabs.Count:n0} custom prefab cache {Prefabs.Count.Plural("element", "elements")}");
+			}
+
 			ClearCustomPrefabs();
 		}
 		if (entities)
 		{
-			if (CreatedEntities.Count != 0) Console.WriteLine($" C4C: Cleared {CreatedEntities.Count:n0} {CreatedEntities.Count.Plural("entity", "entities")}");
+			if (CreatedEntities.Count != 0)
+			{
+				Console.WriteLine($" C4C: Cleared {CreatedEntities.Count:n0} {CreatedEntities.Count.Plural("entity", "entities")}");
+			}
+
 			ClearEntities();
 		}
 
-		if (LoadedAddons.Count != 0) Console.WriteLine($" C4C: Done disposing total of {LoadedAddons.Count:n0} {LoadedAddons.Count.Plural("addon", "addons")} with {LoadedAddons.Sum(x => x.Key.assets.Count):n0} assets from memory");
+		if (LoadedAddons.Count != 0)
+		{
+			Console.WriteLine($" C4C: Done disposing total of {LoadedAddons.Count:n0} {LoadedAddons.Count.Plural("addon", "addons")} with {LoadedAddons.Sum(x => x.Key.assets.Count):n0} assets from memory");
+		}
+
 		foreach (var addon in LoadedAddons)
 		{
 			foreach (var asset in addon.Key.assets)
@@ -619,37 +639,6 @@ public class AddonManager
 		return cache;
 	}
 
-	public void Clear()
-	{
-		foreach (var prefab in CreatedPrefabs)
-		{
-			try
-			{
-				if (prefab == null) continue;
-
-				UnityEngine.Object.Destroy(prefab);
-			}
-			catch (Exception ex)
-			{
-				Logger.Warn($"[AddonManager] Failed destroying cached prefab ({ex.Message})\n{ex.StackTrace}");
-			}
-		}
-
-		foreach (var addon in LoadedAddons)
-		{
-			foreach (var asset in addon.Key.assets)
-			{
-				try
-				{
-					asset.Value.Dispose();
-				}
-				catch (Exception ex)
-				{
-					Logger.Warn($"[AddonManager] Failed disposing of asset '{asset.Key}' (of addon {addon.Key.name}) ({ex.Message})\n{ex.StackTrace}");
-				}
-			}
-		}
-	}
 	public void ClearPrefabs()
 	{
 		foreach (var prefab in CreatedPrefabs)
@@ -697,6 +686,8 @@ public class AddonManager
 		}
 
 		Prefabs.Clear();
+
+		GameManager.ins.UnregisterAllPrefabs();
 	}
 	public void ClearEntities()
 	{
