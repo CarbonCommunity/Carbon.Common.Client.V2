@@ -16,9 +16,6 @@ public partial class ServerNetwork
 		{
 			Logger.Warn($"Failed handshake with {conn}.");
 		}
-
-		var connection = Network.Net.sv.FindConnection(conn.Connection);
-		Community.Runtime.CarbonClient.SendRequestToPlayer(connection);
 	}
 
 	public void Message_AddonsLoaded(CarbonClientConnection conn)
